@@ -125,7 +125,7 @@ def compare_model(con, name: str, spec: dict, schema: str = "converted",
         if n:
             key_sql = ", ".join(f"o.{k}" for k, _ in keys)
             row = con.execute(f"select {key_sql}, o.{a}, r.{b} from {schema}.{name} o join reference.{ref} r "
-                              f"on {on} where {cond} limit 1").fetchall()[0]
+                              f"on {on} where {cond} order by {key_sql} limit 1").fetchall()[0]
             example = f"key={row[:-2]}: ours={row[-2]!r} ref={row[-1]!r}"
         result.columns.append(ColumnResult(a, b, n, example, expected.get(a, "")))
     return result
