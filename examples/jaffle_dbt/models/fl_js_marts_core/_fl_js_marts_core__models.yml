@@ -1,0 +1,110 @@
+version: 2
+
+models:
+  - name: customers
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_CORE, target CUSTOMERS. Flow: SQ_STG_CUSTOMERS -> SQ_STG_ORDERS2 -> AGG_ORDERS_BY_CUSTOMER -> JNR_CUSTOMERS_ORDERS -> EXP_CUSTOMER_METRICS -> CUSTOMERS."
+    columns:
+      - name: customer_id
+        data_type: varchar
+      - name: customer_name
+        data_type: varchar
+      - name: lifetime_orders
+        data_type: decimal(15, 0)
+      - name: first_order_date
+        data_type: timestamp
+      - name: last_order_date
+        data_type: timestamp
+      - name: lifetime_spend
+        data_type: decimal(12, 2)
+      - name: lifetime_spend_pretax
+        data_type: decimal(12, 2)
+      - name: lifetime_tax_paid
+        data_type: decimal(12, 2)
+      - name: customer_type
+        data_type: varchar
+  - name: orders
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_CORE, target ORDERS. Flow: SQ_STG_SUPPLIES2 -> AGG_SUPPLIES_BY_PRODUCT2 -> SQ_STG_ORDER_ITEMS1 -> SQ_STG_PRODUCTS2 -> JNR_ITEMS_PRODUCTS -> JNR_ITEMS_SUPPLIES -> AGG_ITEMS_BY_ORDER -> SQ_STG_ORDERS1 -> JNR_ORDERS_ITEMS_AGG -> EXP_ORDERS_CALC -> SRT_BY_CUSTOMER -> EXP_CUSTOMER_ORDER_NUM -> ORDERS."
+    columns:
+      - name: order_id
+        data_type: varchar
+      - name: customer_id
+        data_type: varchar
+      - name: location_id
+        data_type: varchar
+      - name: ordered_at_day
+        data_type: timestamp
+      - name: subtotal
+        data_type: decimal(12, 2)
+      - name: tax_paid
+        data_type: decimal(12, 2)
+      - name: order_total
+        data_type: decimal(12, 2)
+      - name: order_items_subtotal
+        data_type: decimal(12, 2)
+      - name: order_cost
+        data_type: decimal(12, 2)
+      - name: has_food_items
+        data_type: decimal(1, 0)
+      - name: has_drink_items
+        data_type: decimal(1, 0)
+      - name: customer_order_number
+        data_type: decimal(15, 0)
+  - name: order_items
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_CORE, target ORDER_ITEMS. Flow: SQ_STG_ORDER_ITEMS -> SQ_STG_ORDERS -> JNR_ORDER_ITEMS_ORDERS -> SQ_STG_PRODUCTS1 -> JNR_ADD_PRODUCTS -> SQ_STG_SUPPLIES1 -> SRT_SUPPLIES -> AGG_SUPPLIES_BY_PRODUCT -> JNR_ADD_SUPPLY_COST -> EXP_ORDER_ITEMS_CALC -> ORDER_ITEMS."
+    columns:
+      - name: order_item_id
+        data_type: varchar
+      - name: order_id
+        data_type: varchar
+      - name: product_id
+        data_type: varchar
+      - name: ordered_at_day
+        data_type: timestamp
+      - name: product_name
+        data_type: varchar
+      - name: product_type
+        data_type: varchar
+      - name: product_price
+        data_type: decimal(12, 2)
+      - name: is_food_item
+        data_type: decimal(1, 0)
+      - name: is_drink_item
+        data_type: decimal(1, 0)
+      - name: supply_cost_per_product
+        data_type: decimal(12, 2)
+      - name: has_perishable_supply
+        data_type: decimal(1, 0)
+  - name: products
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_CORE, target PRODUCTS. Flow: SQ_STG_PRODUCTS -> PRODUCTS."
+    columns:
+      - name: product_id
+        data_type: varchar
+      - name: product_name
+        data_type: varchar
+      - name: product_type
+        data_type: varchar
+      - name: product_price_cents
+        data_type: decimal(15, 0)
+      - name: product_price
+        data_type: decimal(12, 2)
+      - name: product_description
+        data_type: varchar
+      - name: is_food_item
+        data_type: decimal(1, 0)
+      - name: is_drink_item
+        data_type: decimal(1, 0)
+  - name: supplies
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_CORE, target SUPPLIES. Flow: SQ_STG_SUPPLIES -> SUPPLIES."
+    columns:
+      - name: supply_id
+        data_type: varchar
+      - name: supply_name
+        data_type: varchar
+      - name: supply_cost_cents
+        data_type: decimal(12, 2)
+      - name: supply_cost
+        data_type: decimal(12, 2)
+      - name: is_perishable
+        data_type: decimal(1, 0)
+      - name: product_id
+        data_type: varchar

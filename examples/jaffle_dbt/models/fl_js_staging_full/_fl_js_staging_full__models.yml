@@ -1,0 +1,89 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: "Converted from PowerCenter mapping m_FL_JS_STAGING_FULL, target STG_CUSTOMERS. Flow: SQ_RAW_CUSTOMERS -> STG_CUSTOMERS."
+    columns:
+      - name: customer_id
+        data_type: varchar
+      - name: customer_name
+        data_type: varchar
+  - name: stg_locations
+    description: "Converted from PowerCenter mapping m_FL_JS_STAGING_FULL, target STG_LOCATIONS. Flow: SQ_RAW_STORES -> EXP_LOCATIONS -> SRT_LOC_BEFORE -> RTR_REGION -> SRT_APAC -> EXP_APAC_RENAME_TRANS -> SRT_EMEA -> EXP_EMEA_RENAME_TRANS -> SRT_AMER -> EXP_AMER_RENAME_TRANS -> UN_REGIONS -> SRT_LOC_AFTER -> STG_LOCATIONS."
+    columns:
+      - name: location_id
+        data_type: varchar
+      - name: location_name
+        data_type: varchar
+      - name: opened_date
+        data_type: timestamp
+      - name: tax_rate
+        data_type: decimal(6, 4)
+      - name: region
+        data_type: varchar
+  - name: stg_orders
+    description: "Converted from PowerCenter mapping m_FL_JS_STAGING_FULL, target STG_ORDERS. Flow: SQ_RAW_ORDERS -> EXP_ORDERS -> SRT_ORDERS -> STG_ORDERS."
+    columns:
+      - name: order_id
+        data_type: varchar
+      - name: customer_id
+        data_type: varchar
+      - name: location_id
+        data_type: varchar
+      - name: ordered_at_day
+        data_type: timestamp
+      - name: subtotal_cents
+        data_type: decimal(15, 0)
+      - name: tax_paid_cents
+        data_type: decimal(15, 0)
+      - name: order_total_cents
+        data_type: decimal(12, 2)
+      - name: subtotal
+        data_type: decimal(15, 0)
+      - name: tax_paid
+        data_type: decimal(15, 0)
+      - name: order_total
+        data_type: decimal(12, 2)
+  - name: stg_order_items
+    description: "Converted from PowerCenter mapping m_FL_JS_STAGING_FULL, target STG_ORDER_ITEMS. Flow: SQ_RAW_ITEMS -> EXP_ORDER_ITEMS -> STG_ORDER_ITEMS."
+    columns:
+      - name: order_item_id
+        data_type: varchar
+      - name: order_id
+        data_type: varchar
+      - name: product_id
+        data_type: varchar
+  - name: stg_products
+    description: "Converted from PowerCenter mapping m_FL_JS_STAGING_FULL, target STG_PRODUCTS. Flow: SQ_RAW_PRODUCTS -> EXP_PRODUCTS -> STG_PRODUCTS."
+    columns:
+      - name: product_id
+        data_type: varchar
+      - name: product_name
+        data_type: varchar
+      - name: product_type
+        data_type: varchar
+      - name: product_price_cents
+        data_type: decimal(15, 0)
+      - name: product_price
+        data_type: decimal(12, 2)
+      - name: product_description
+        data_type: varchar
+      - name: is_food_item
+        data_type: decimal(1, 0)
+      - name: is_drink_item
+        data_type: decimal(1, 0)
+  - name: stg_supplies
+    description: "Converted from PowerCenter mapping m_FL_JS_STAGING_FULL, target STG_SUPPLIES. Flow: SQ_RAW_SUPPLIES -> SQ_RAW_PRODUCTS1 -> JNR_SUPPLIES_PRODUCTS -> EXP_SUPPLIES -> STG_SUPPLIES."
+    columns:
+      - name: supply_id
+        data_type: varchar
+      - name: supply_name
+        data_type: varchar
+      - name: supply_cost_cents
+        data_type: decimal(12, 2)
+      - name: supply_cost
+        data_type: decimal(12, 2)
+      - name: is_perishable
+        data_type: decimal(1, 0)
+      - name: product_id
+        data_type: varchar

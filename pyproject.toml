@@ -1,0 +1,38 @@
+[project]
+name = "pwc-to-dbt"
+version = "0.1.0"
+description = "Convert Informatica PowerCenter mapping exports (XML) into dbt models"
+readme = "README.md"
+authors = [
+    { name = "Georgi Muleshkov", email = "g.muleshkov@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+pwc-to-dbt = "pwc_to_dbt:main"
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "dbt-duckdb>=1.11.1",
+    "duckdb>=2.0.0",
+    "pytest>=9.2.0",
+    "ruff>=0.17.4",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["verify/reference", "verify/work", "out"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["e2e: builds the jaffle-shop reference and runs dbt (slow, needs network on first run)"]
+addopts = "-m 'not e2e'"

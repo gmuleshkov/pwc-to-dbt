@@ -1,0 +1,92 @@
+# How converted models line up with dbt-labs/jaffle-shop models (the reference).
+#
+# key       columns to join on: "name" or ["ours", "reference"]
+# columns   renames: ours = "reference"  (same-name columns are compared automatically)
+# expected           known differences for the ORIGINAL export: column = "reason"; "_rows" for row counts.
+# expected_repaired  known differences for the export with defects P1-P5 patched (verify/repair_mapping.py).
+#                    Every entry must actually differ, otherwise compare.py reports a stale expectation.
+#
+# Defect ids (see README "Defects in the sample mapping"):
+#   P1 crossed target links      P2 dollars stored in number(15,0)      P3 variable-port order
+#   P4 Master Outer join drops orders without items                     P5 PERISHABLE flag values
+
+[models.stg_customers]
+key = ["customer_id"]
+
+[models.stg_locations]
+key = ["location_id"]
+
+[models.stg_order_items]
+key = ["order_item_id"]
+
+[models.stg_orders]
+key = ["order_id"]
+columns = { ordered_at_day = "ordered_at" }
+
+[models.stg_orders.expected]
+subtotal_cents = "P1: linked from the dollar port SUBTOTAL, and number(15,0) rounds it to whole dollars"
+tax_paid_cents = "P1: linked from the dollar port TAX_PAID, rounded to whole dollars by number(15,0)"
+order_total_cents = "P1: linked from the dollar port ORDER_TOTAL"
+subtotal = "P1: linked from the cents port SUBTOTAL_CENTS"
+tax_paid = "P1: linked from the cents port TAX_PAID_CENTS"
+order_total = "P1: linked from the cents port ORDER_TOTAL_CENTS"
+
+[models.stg_products]
+key = ["product_id"]
+
+[models.stg_products.expected]
+product_price = "P1: PRODUCT_PRICE and PRODUCT_PRICE_CENTS links are crossed, so the column holds cents"
+
+[models.stg_supplies]
+key = ["supply_id", "product_id"]
+columns = { is_perishable = "is_perishable_supply" }
+
+[models.stg_supplies.expected]
+is_perishable = "P5: mapping tests PERISHABLE = 'Y' or '1'; the data holds True/False, so it is always 0"
+
+[models.customers]
+key = ["customer_id"]
+columns = { lifetime_orders = "count_lifetime_orders", first_order_date = "first_ordered_at", last_order_date = "last_ordered_at" }
+
+[models.customers.expected]
+lifetime_spend = "P1 downstream: sums STG_ORDERS.ORDER_TOTAL, which holds cents"
+lifetime_spend_pretax = "P1 downstream: sums STG_ORDERS.SUBTOTAL, which holds cents"
+lifetime_tax_paid = "P1 downstream: sums STG_ORDERS.TAX_PAID, which holds cents"
+
+[models.orders]
+key = ["order_id"]
+columns = { ordered_at_day = "ordered_at", has_food_items = "is_food_order", has_drink_items = "is_drink_order" }
+
+[models.orders.expected]
+_rows = "P4: Master Outer join with orders as MASTER keeps only orders that have items (483 dropped)"
+subtotal = "P1+P2 downstream: recalculated as SUBTOTAL_CENTS/100, and that column holds rounded dollars"
+tax_paid = "P1+P2 downstream: recalculated as TAX_PAID_CENTS/100 from rounded dollars"
+order_total = "P1 downstream: recalculated as ORDER_TOTAL_CENTS/100, and that column holds dollars"
+order_items_subtotal = "P1 downstream: sums STG_PRODUCTS.PRODUCT_PRICE, which holds cents"
+customer_order_number = "P3: v_PREV_CUSTOMER_ID is assigned above its reader, so the sequence never resets (global running count)"
+
+[models.orders.expected_repaired]
+order_items_subtotal = "design: the mapping writes 0 for orders without items (IIF(ISNULL(x), 0, x)); the reference leaves NULL"
+order_cost = "design: 0 instead of NULL for orders without items"
+has_food_items = "design: 0 instead of NULL for orders without items"
+has_drink_items = "design: 0 instead of NULL for orders without items"
+
+[models.order_items]
+key = ["order_item_id"]
+columns = { ordered_at_day = "ordered_at", supply_cost_per_product = "supply_cost" }
+
+[models.order_items.expected]
+product_price = "P1 downstream: STG_PRODUCTS.PRODUCT_PRICE holds cents"
+
+[models.products]
+key = ["product_id"]
+
+[models.products.expected]
+product_price = "P1 downstream: STG_PRODUCTS.PRODUCT_PRICE holds cents"
+
+[models.supplies]
+key = ["supply_id", "product_id"]
+columns = { is_perishable = "is_perishable_supply" }
+
+[models.supplies.expected]
+is_perishable = "P5 downstream: STG_SUPPLIES.IS_PERISHABLE is always 0"

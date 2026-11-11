@@ -1,0 +1,253 @@
+version: 2
+
+models:
+  - name: int_fl_js_marts_enriched__exp_item_calculations
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_ENRICHED, output of shared transformation EXP_ITEM_CALCULATIONS. Flow: SQ_STG_ORDER_ITEMS -> SQ_STG_ORDERS -> JNR_ITEMS_ORDERS -> SQ_STG_PRODUCTS -> JNR_ADD_PRODUCTS -> SQ_STG_CUSTOMERS -> JNR_ADD_CUSTOMERS -> SQ_STG_LOCATIONS -> JNR_ADD_LOCATIONS -> SQ_STG_SUPPLIES -> SRT_SUPPLIES -> AGG_SUPPLIES_BY_PRODUCT -> JNR_ADD_SUPPLIES -> EXP_ITEM_CALCULATIONS."
+    columns:
+      - name: order_item_id
+      - name: order_id
+      - name: product_id
+      - name: customer_id
+      - name: location_id
+      - name: ordered_at_day
+      - name: product_name
+      - name: product_type
+      - name: product_price
+      - name: is_food_item
+      - name: is_drink_item
+      - name: customer_name
+      - name: location_name
+      - name: region
+      - name: item_revenue
+      - name: item_cogs
+      - name: item_gross_profit
+      - name: item_gross_margin_pct
+      - name: item_tax_estimate
+      - name: item_total_estimate
+      - name: has_perishable_supply
+  - name: int_fl_js_marts_enriched__exp_customer_order_num
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_ENRICHED, output of shared transformation EXP_CUSTOMER_ORDER_NUM. Flow: SRT_ORDER_ID -> AGG_ITEMS_BY_ORDER -> SQ_STG_ORDERS1 -> JNR_ORDERS_ITEMS_AGG -> EXP_ORDER_FINANCIALS -> SRT_FOR_CUSTOMER_SEQ -> EXP_CUSTOMER_ORDER_NUM."
+    columns:
+      - name: customer_id
+      - name: ordered_at_day
+      - name: order_id
+      - name: location_id
+      - name: order_subtotal
+      - name: order_tax_paid
+      - name: order_total
+      - name: item_lines
+      - name: item_revenue
+      - name: order_cogs
+      - name: order_gross_profit
+      - name: order_gross_margin_pct
+      - name: effective_tax_rate
+      - name: food_item_lines
+      - name: drink_item_lines
+      - name: food_share_of_lines
+      - name: drink_share_of_lines
+      - name: customer_order_number
+  - name: int_fl_js_marts_enriched__un_order_bands
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_ENRICHED, output of shared transformation UN_ORDER_BANDS. Flow: SRT_BEFORE_ROUTER -> RTR_ORDER_VALUE_BAND -> EXP_HIGH_BAND -> EXP_STD_BAND -> UN_ORDER_BANDS."
+    columns:
+      - name: order_id
+      - name: customer_id
+      - name: location_id
+      - name: ordered_at_day
+      - name: order_subtotal
+      - name: order_tax_paid
+      - name: order_total
+      - name: item_lines
+      - name: item_revenue
+      - name: order_cogs
+      - name: order_gross_profit
+      - name: order_gross_margin_pct
+      - name: effective_tax_rate
+      - name: food_item_lines
+      - name: drink_item_lines
+      - name: food_share_of_lines
+      - name: drink_share_of_lines
+      - name: customer_order_number
+      - name: order_value_band
+  - name: customer_360
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_ENRICHED, target CUSTOMER_360. Flow: AGGTRANS -> SQ_STG_CUSTOMERS1 -> JNR_CUSTOMERS -> EXP_CUSTOMER_METRICS -> EXP_RECENCY1 -> EXP_RECENCY2 -> EXP_RFM_SCORES -> EXP_RFM_SEGMENT -> CUSTOMER_360."
+    columns:
+      - name: customer_id
+        data_type: varchar
+      - name: customer_name
+        data_type: varchar
+      - name: count_lifetime_orders
+        data_type: decimal(15, 0)
+      - name: first_ordered_at
+        data_type: timestamp
+      - name: last_ordered_at
+        data_type: timestamp
+      - name: lifetime_spend_pretax
+        data_type: decimal(12, 2)
+      - name: lifetime_tax_paid
+        data_type: decimal(12, 2)
+      - name: lifetime_spend
+        data_type: decimal(12, 2)
+      - name: lifetime_cogs
+        data_type: decimal(12, 2)
+      - name: lifetime_gross_profit
+        data_type: decimal(12, 2)
+      - name: avg_order_value
+        data_type: decimal(12, 2)
+      - name: high_value_orders
+        data_type: decimal(15, 0)
+      - name: customer_type
+        data_type: varchar
+      - name: recency_days
+        data_type: decimal(15, 0)
+      - name: r_score
+        data_type: decimal(1, 0)
+      - name: f_score
+        data_type: decimal(1, 0)
+      - name: m_score
+        data_type: decimal(1, 0)
+      - name: rfm_score
+        data_type: decimal(15, 0)
+      - name: rfm_segment
+        data_type: varchar
+  - name: order_financials
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_ENRICHED, target ORDER_FINANCIALS. Flow: ORDER_FINANCIALS1."
+    columns:
+      - name: order_id
+        data_type: varchar
+      - name: customer_id
+        data_type: varchar
+      - name: location_id
+        data_type: varchar
+      - name: ordered_at_day
+        data_type: timestamp
+      - name: order_subtotal
+        data_type: decimal(12, 2)
+      - name: order_tax_paid
+        data_type: decimal(12, 2)
+      - name: order_total
+        data_type: decimal(12, 2)
+      - name: item_lines
+        data_type: decimal(15, 0)
+      - name: item_revenue
+        data_type: decimal(12, 2)
+      - name: order_cogs
+        data_type: decimal(12, 2)
+      - name: order_gross_profit
+        data_type: decimal(12, 2)
+      - name: order_gross_margin_pct
+        data_type: decimal(10, 4)
+      - name: effective_tax_rate
+        data_type: decimal(10, 4)
+      - name: food_item_lines
+        data_type: decimal(15, 0)
+      - name: drink_item_lines
+        data_type: decimal(15, 0)
+      - name: food_share_of_lines
+        data_type: decimal(10, 4)
+      - name: drink_share_of_lines
+        data_type: decimal(10, 4)
+      - name: customer_order_number
+        data_type: decimal(15, 0)
+      - name: order_value_band
+        data_type: varchar
+  - name: order_item_enriched
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_ENRICHED, target ORDER_ITEM_ENRICHED. Flow: SRT_ORDER_ID -> ORDER_ITEM_ENRICHED."
+    columns:
+      - name: order_item_id
+        data_type: varchar
+      - name: order_id
+        data_type: varchar
+      - name: product_id
+        data_type: varchar
+      - name: customer_id
+        data_type: varchar
+      - name: customer_name
+        data_type: varchar
+      - name: location_id
+        data_type: varchar
+      - name: location_name
+        data_type: varchar
+      - name: region
+        data_type: varchar
+      - name: ordered_at_day
+        data_type: timestamp
+      - name: product_name
+        data_type: varchar
+      - name: product_type
+        data_type: varchar
+      - name: product_price
+        data_type: decimal(12, 2)
+      - name: is_food_item
+        data_type: decimal(1, 0)
+      - name: is_drink_item
+        data_type: decimal(1, 0)
+      - name: item_revenue
+        data_type: decimal(12, 2)
+      - name: item_cogs
+        data_type: decimal(12, 2)
+      - name: item_gross_profit
+        data_type: decimal(12, 2)
+      - name: item_gross_margin_pct
+        data_type: decimal(10, 4)
+      - name: item_tax_estimate
+        data_type: decimal(12, 2)
+      - name: item_total_estimate
+        data_type: decimal(12, 2)
+      - name: has_perishable_supply
+        data_type: decimal(1, 0)
+  - name: product_daily_performance
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_ENRICHED, target PRODUCT_DAILY_PERFORMANCE. Flow: SRT_ORDER_ID -> SRT_BEFORE_AGG_PDP -> AGG_BY_PRODUCT_DAY -> EXP_PRODUCT_METRICS -> PRODUCT_DAILY_PERFORMANCE."
+    columns:
+      - name: product_id
+        data_type: varchar
+      - name: product_name
+        data_type: varchar
+      - name: product_type
+        data_type: varchar
+      - name: ordered_at_day
+        data_type: timestamp
+      - name: units_sold
+        data_type: decimal(15, 0)
+      - name: revenue
+        data_type: decimal(12, 2)
+      - name: cogs
+        data_type: decimal(12, 2)
+      - name: gross_profit
+        data_type: decimal(12, 2)
+      - name: margin_pct
+        data_type: decimal(10, 4)
+      - name: perishable_sales_flag
+        data_type: decimal(1, 0)
+  - name: store_daily_kpis
+    description: "Converted from PowerCenter mapping m_FL_JS_MARTS_ENRICHED, target STORE_DAILY_KPIS. Flow: SRT_BEFORE_AGG -> SRT_FOR_DISTINCT_CUSTOMER -> EXP_MARK_FIRST_CUSTOMER -> AGG_BY_LOCATION_DAY -> EXP_STORE_KPIS -> SQ_STG_LOCATIONS1 -> JNR_ADD_LOCATION_INFO -> FIL_LOCS -> STORE_DAILY_KPIS."
+    columns:
+      - name: location_id
+        data_type: varchar
+      - name: location_name
+        data_type: varchar
+      - name: region
+        data_type: varchar
+      - name: ordered_at_day
+        data_type: timestamp
+      - name: orders_count
+        data_type: decimal(15, 0)
+      - name: unique_customers
+        data_type: decimal(15, 0)
+      - name: revenue_total
+        data_type: decimal(12, 2)
+      - name: subtotal_total
+        data_type: decimal(12, 2)
+      - name: tax_total
+        data_type: decimal(12, 2)
+      - name: cogs_total
+        data_type: decimal(12, 2)
+      - name: gross_profit_total
+        data_type: decimal(12, 2)
+      - name: gross_margin_pct
+        data_type: decimal(10, 4)
+      - name: avg_order_value
+        data_type: decimal(12, 2)
+      - name: high_value_orders
+        data_type: decimal(15, 0)
+      - name: high_value_orders_pct
+        data_type: decimal(10, 4)
