@@ -37,5 +37,8 @@ select = ["E", "F", "W", "I", "B", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["e2e: builds the jaffle-shop reference and runs dbt (slow, needs network on first run)"]
-addopts = "-m 'not e2e'"
+markers = [
+    "e2e: builds the jaffle-shop reference and runs dbt (slow, needs network on first run)",
+    "ui: browser tests of the demo page (needs Playwright and Chrome: make ui)",
+]
+addopts = "-m 'not e2e and not ui'"

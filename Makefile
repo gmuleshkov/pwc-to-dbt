@@ -1,7 +1,7 @@
 SAMPLE := examples/FLOWLINE_DEMO_JAFFLESHOP.xml
 UV ?= uv
 
-.PHONY: install test e2e convert repair golden lint inspect demo clean
+.PHONY: install test e2e convert repair golden lint inspect demo ui clean
 
 install:  ## create .venv with the converter, dbt-duckdb and test tools
 	$(UV) sync
@@ -27,6 +27,9 @@ golden:  ## accept the current converter output as the golden files
 
 demo:  ## interactive presentation of this project on http://127.0.0.1:8765 (demo/README.md)
 	$(UV) run python demo/server.py
+
+ui:  ## browser tests of the demo page (Playwright + Chrome; slow parts need verify/work/jaffle.duckdb unlocked)
+	$(UV) run --with playwright pytest -m ui -q
 
 lint:
 	$(UV) run ruff check src tests demo verify/*.py

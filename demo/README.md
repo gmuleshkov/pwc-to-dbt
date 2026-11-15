@@ -57,6 +57,20 @@ Tested with Chrome. Any current browser should work, and the page follows the sy
 | The browser does not open | Open the printed address yourself. |
 | Slide text changed but the page still shows the old text | Slide text is loaded when the server starts. Restart it. Code and styles reload on refresh. |
 
+## Testing the demo
+
+```bash
+make test    # includes tests/test_demo.py: guards, endpoints, every graph, every slide link and query (about 1 s)
+make ui      # tests/test_demo_ui.py: drives the page in Chrome with Playwright (about 1 min)
+```
+
+`make ui` runs `uv run --with playwright pytest -m ui`, so Playwright is installed on the fly and nothing is added to
+the project's dependencies. It uses your installed Google Chrome (or Playwright's Chromium after
+`uv run --with playwright python -m playwright install chromium`). It clicks every button, opens every file link,
+walks every mapping graph, runs the SQL console (including refused statements), runs the full end-to-end check from
+the page, and checks light/dark themes and small screens. The end-to-end parts skip themselves if another process
+(for example a `duckdb` shell) holds `verify/work/jaffle.duckdb`.
+
 ## Safety
 
 - The server listens on `127.0.0.1` only and rejects other `Host` and `Origin` headers.
@@ -74,6 +88,7 @@ demo/graph.py         draws a mapping as an SVG from the converter's own data (o
 demo/slides.py        the ten slides as data: key points, mentions, links, buttons, queries (edit text here)
 demo/static/          index.html, app.js, style.css (no dependencies)
 tests/test_demo.py    guards, endpoints, every graph, and a check that every link and query in the slides still works
+tests/test_demo_ui.py browser tests (Playwright), run with `make ui`
 ```
 
 In PyCharm, run `demo/server.py` from the editor (right-click, Run) with the project interpreter `.venv`, or use the

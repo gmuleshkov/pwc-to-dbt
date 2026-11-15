@@ -357,13 +357,13 @@ blocks.translator = (b) => {
     let r;
     try { r = await api("/api/translate", { formula: formula.value, columns: columns.value }); } catch (e) { out.replaceChildren(h("p", { class: "err" }, e.message)); return; }
     if (mine !== seq) return;
-    out.replaceChildren(
+    out.replaceChildren(...[
       h("h3", {}, "1. Tokens (tokenizer)"), h("div", {}, r.tokens.map((t) => h("span", { class: "tok" }, h("small", {}, t.kind), t.text))),
       h("h3", {}, "2. Tree (parser)"), r.tree ? h("ul", { class: "tree" }, treeEl(r.tree)) : h("p", { class: "note" }, "no tree"),
       h("h3", {}, "3. SQL (emitter)"),
       r.error ? h("p", { class: "err" }, r.error) : h("pre", { class: "sqlout" }, r.sql),
       r.type ? h("p", { class: "note" }, "inferred type: " + r.type) : null,
-      r.warnings.map((w) => h("p", { class: "warnline" }, "warning: " + w)));
+      ...r.warnings.map((w) => h("p", { class: "warnline" }, "warning: " + w))].filter(Boolean));
   };
   const schedule = () => { clearTimeout(timer); timer = setTimeout(run, 200); };
   formula.addEventListener("input", schedule);
@@ -407,7 +407,7 @@ function renderSlide(i) {
 function buildNav() {
   const nav = $("#steps");
   slides.forEach((s, i) => nav.append(h("button", { class: s.core ? "" : "optional", title: s.title + (s.core ? "" : " (optional)"), onclick: () => renderSlide(i) },
-    h("span", { class: "n" }, i + 1), s.title.split(":")[0])));
+    h("span", { class: "n" }, i + 1), s.short)));
   $("#prev").addEventListener("click", () => renderSlide(current - 1));
   $("#next").addEventListener("click", () => renderSlide(current + 1));
 }
@@ -423,11 +423,12 @@ document.addEventListener("keydown", (e) => {
 
 // stopwatch for rehearsal
 let t0 = Date.now();
-setInterval(() => {
+const tick = () => {
   const s = Math.floor((Date.now() - t0) / 1000);
   $("#timer").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-}, 1000);
-$("#timer").addEventListener("click", () => { t0 = Date.now(); });
+};
+setInterval(tick, 1000);
+$("#timer").addEventListener("click", () => { t0 = Date.now(); tick(); });
 
 (async function init() {
   try { slides = await api("/api/slides"); } catch (e) { $("#slide").textContent = "Cannot load the slides: " + e.message; return; }

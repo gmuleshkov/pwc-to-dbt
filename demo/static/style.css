@@ -86,7 +86,7 @@ details.qa p { margin: 6px 0 4px; color: var(--muted); }
 
 /* links */
 .links { display: flex; flex-direction: column; gap: 4px; }
-.linkbtn { background: none; border: none; padding: 2px 0; color: var(--accent); text-align: left; text-decoration: underline; text-underline-offset: 3px; }
+.linkbtn { overflow-wrap: anywhere; background: none; border: none; padding: 2px 0; color: var(--accent); text-align: left; text-decoration: underline; text-underline-offset: 3px; }
 .linkbtn .where { color: var(--muted); font-size: 12px; margin-left: 6px; text-decoration: none; font-family: var(--mono); }
 
 /* buttons */
@@ -125,10 +125,10 @@ svg.graph .node:hover rect { stroke: var(--accent); }
 svg.graph .node.sel rect { stroke: var(--accent); stroke-width: 3; }
 svg.graph .name { font: 600 12px var(--mono); fill: var(--ink); }
 svg.graph .type { font: 11px var(--sans); fill: var(--muted); }
-.k-source rect { fill: var(--k-source); } .k-sq rect { fill: var(--k-sq); } .k-expr rect { fill: var(--k-expr); }
-.k-filter rect { fill: var(--k-filter); } .k-sorter rect { fill: var(--k-sorter); } .k-joiner rect { fill: var(--k-joiner); }
-.k-aggr rect { fill: var(--k-aggr); } .k-router rect { fill: var(--k-router); } .k-union rect { fill: var(--k-union); }
-.k-target rect { fill: var(--k-target); }
+svg.graph .k-source rect { fill: var(--k-source); } svg.graph .k-sq rect { fill: var(--k-sq); } svg.graph .k-expr rect { fill: var(--k-expr); }
+svg.graph .k-filter rect { fill: var(--k-filter); } svg.graph .k-sorter rect { fill: var(--k-sorter); } svg.graph .k-joiner rect { fill: var(--k-joiner); }
+svg.graph .k-aggr rect { fill: var(--k-aggr); } svg.graph .k-router rect { fill: var(--k-router); } svg.graph .k-union rect { fill: var(--k-union); }
+svg.graph .k-target rect { fill: var(--k-target); }
 select, input[type=text], textarea { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); }
 textarea { width: 100%; font-family: var(--mono); font-size: 13px; }
 input.wide { width: 100%; font-family: var(--mono); font-size: 14px; }

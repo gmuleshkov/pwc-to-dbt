@@ -205,6 +205,7 @@ class Busy(Exception):
 
 STATE = {"job": None, "db_busy": False}
 STATE_LOCK = threading.Lock()
+DB_LOCK = threading.Lock()  # readers (SQL console, comparison tables) and the e2e start take turns on the database
 
 SQL_FIRST_WORDS = {"select", "with", "describe", "show", "summarize", "from"}
 
@@ -230,26 +231,27 @@ def run_sql(sql: str) -> dict:
     import duckdb
 
     s = check_sql(sql)
-    if STATE["db_busy"]:
-        raise Busy("the database is being rebuilt by an e2e run; try again when it finishes")
     if not DB.exists():
         raise FileNotFoundError("verify/work/jaffle.duckdb does not exist yet: run the e2e step first")
     started = time.time()
-    # enable_external_access=False blocks read_csv('/etc/passwd') and friends; read_only blocks all writes.
-    con = duckdb.connect(str(DB), read_only=True, config={"enable_external_access": False})
-    timer = threading.Timer(15, con.interrupt)
-    timer.start()
-    try:
-        cur = con.execute(s)
-        cols = [d[0] for d in cur.description]
-        rows = cur.fetchmany(MAX_ROWS + 1)
-    except duckdb.InterruptException as e:
-        raise ValueError("query took longer than 15 s and was stopped") from e
-    except duckdb.Error as e:
-        raise ValueError(str(e)) from e
-    finally:
-        timer.cancel()
-        con.close()
+    with DB_LOCK:
+        if STATE["db_busy"]:
+            raise Busy("the database is being rebuilt by an e2e run; try again when it finishes")
+        # enable_external_access=False blocks read_csv('/etc/passwd') and friends; read_only blocks all writes.
+        con = duckdb.connect(str(DB), read_only=True, config={"enable_external_access": False})
+        timer = threading.Timer(15, con.interrupt)
+        timer.start()
+        try:
+            cur = con.execute(s)
+            cols = [d[0] for d in cur.description]
+            rows = cur.fetchmany(MAX_ROWS + 1)
+        except duckdb.InterruptException as e:
+            raise ValueError("query took longer than 15 s and was stopped") from e
+        except duckdb.Error as e:
+            raise ValueError(str(e)) from e
+        finally:
+            timer.cancel()
+            con.close()
     return {"columns": cols, "rows": [[jsonable(v) for v in r] for r in rows[:MAX_ROWS]],
             "truncated": len(rows) > MAX_ROWS, "ms": round((time.time() - started) * 1000)}
 
@@ -269,11 +271,13 @@ def db_lock_free() -> bool:
 
 def compare_summary(which: str) -> dict:
     schema, key = {"original": ("converted", "expected"), "repaired": ("repaired", "expected_repaired")}[which]
-    if STATE["db_busy"]:
-        raise Busy("the database is being rebuilt by an e2e run; try again when it finishes")
     if not DB.exists():
         raise FileNotFoundError("verify/work/jaffle.duckdb does not exist yet: run the e2e step first")
-    results = compare.run(DB, schema=schema, expected_key=key)
+    with DB_LOCK:
+        if STATE["db_busy"]:
+            raise Busy("the database is being rebuilt by an e2e run; try again when it finishes")
+        results = compare.run(DB, schema=schema, expected_key=key)
+        inv = invariants.run(DB, schema) if which == "repaired" else None
     models = []
     for r in results:
         differing = [c for c in r.columns if c.status != "match"]
@@ -285,7 +289,7 @@ def compare_summary(which: str) -> dict:
                            "reason": c.expected_reason, "example": c.example} for c in differing],
         })
     return {"run": which, "schema": schema, "models": models, "failures": compare.failures(results),
-            "invariants": invariants.run(DB, schema) if which == "repaired" else None}
+            "invariants": inv}
 
 
 # -- actions: a fixed list of commands, one at a time, output polled by the page ---------------------------------
@@ -367,11 +371,12 @@ def act_convert(job: Job, params: dict) -> tuple[bool, str]:
 
 
 def act_e2e(job: Job, params: dict) -> tuple[bool, str]:
-    if not db_lock_free():
-        job.add("The demo database is locked by another process, probably a `duckdb` shell.")
-        job.add("Type .quit in that shell (or close it) and run this step again.")
-        return False, "database locked by another process"
-    STATE["db_busy"] = True
+    with DB_LOCK:  # waits for a running query or table load, then keeps new ones out
+        if not db_lock_free():
+            job.add("The demo database is locked by another process, probably a `duckdb` shell.")
+            job.add("Type .quit in that shell (or close it) and run this step again.")
+            return False, "database locked by another process"
+        STATE["db_busy"] = True
     try:
         job.add("$ make e2e   (convert -> dbt build on DuckDB -> compare with dbt-labs/jaffle-shop)")
         code = job.run_cmd([*PYTEST, "-m", "e2e", "-s", "-q"])

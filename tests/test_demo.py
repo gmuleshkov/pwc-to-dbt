@@ -170,6 +170,7 @@ def test_slides_are_well_formed():
     assert len(slides.SLIDES) == 10 and len({s["id"] for s in slides.SLIDES}) == 10
     for s in slides.SLIDES:
         assert s["points"] and s["mention"] and s["blocks"], s["id"]
+        assert s["short"] and len(s["short"]) <= 12, s["id"]
         for b in s["blocks"]:
             assert b["type"] in BLOCK_TYPES, f"{s['id']}: no renderer for block type {b['type']}"
             if b["type"] == "action":

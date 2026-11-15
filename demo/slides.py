@@ -39,6 +39,7 @@ SLIDES = [
     # ------------------------------------------------------------------------------------------------ 1
     {
         "id": "problem",
+        "short": "Problem",
         "title": "The problem and the approach",
         "subtitle": "Informatica PowerCenter mappings (XML) become dbt models (SQL)",
         "core": True,
@@ -93,6 +94,7 @@ SLIDES = [
     # ------------------------------------------------------------------------------------------------ 2
     {
         "id": "input",
+        "short": "Input",
         "title": "The input: a PowerCenter export",
         "subtitle": "A graph of transformations plus formulas written as text",
         "core": True,
@@ -127,6 +129,7 @@ SLIDES = [
     # ------------------------------------------------------------------------------------------------ 3
     {
         "id": "how",
+        "short": "Formulas",
         "title": "How it works: formulas",
         "subtitle": "Tokenizer, then parser, then SQL emitter",
         "core": True,
@@ -167,6 +170,7 @@ SLIDES = [
     # ------------------------------------------------------------------------------------------------ 4
     {
         "id": "output",
+        "short": "Output",
         "title": "The output: one model per target",
         "subtitle": "Each PowerCenter box becomes one CTE, in the same order",
         "core": True,
@@ -202,6 +206,7 @@ SLIDES = [
     # ------------------------------------------------------------------------------------------------ 5
     {
         "id": "hard",
+        "short": "Hard cases",
         "title": "The hard cases",
         "subtitle": "Where row-by-row and set-based thinking differ",
         "core": False,
@@ -236,6 +241,7 @@ SLIDES = [
     # ------------------------------------------------------------------------------------------------ 6
     {
         "id": "proof",
+        "short": "Proof",
         "title": "The proof: compare with the real jaffle shop",
         "subtitle": "One DuckDB file, four schemas, two runs",
         "core": True,
@@ -274,6 +280,7 @@ SLIDES = [
     # ------------------------------------------------------------------------------------------------ 7
     {
         "id": "defects",
+        "short": "Defects",
         "title": "Five defects in the sample mapping",
         "subtitle": "Reproduced faithfully, warned about where possible, fixed in a separate copy",
         "core": True,
@@ -340,6 +347,7 @@ SLIDES = [
     # ------------------------------------------------------------------------------------------------ 8
     {
         "id": "tests",
+        "short": "Tests",
         "title": "Tests",
         "subtitle": "83 fast tests, most of them executing the generated SQL",
         "core": True,
@@ -374,6 +382,7 @@ SLIDES = [
     # ------------------------------------------------------------------------------------------------ 9
     {
         "id": "limits",
+        "short": "Limits",
         "title": "Limits and how it would scale",
         "subtitle": "What is handled, what is reported, what is not",
         "core": True,
@@ -428,6 +437,7 @@ SLIDES = [
     # ------------------------------------------------------------------------------------------------ 10
     {
         "id": "decisions",
+        "short": "Decisions",
         "title": "Decisions, process and what is next",
         "subtitle": "How it was built with a coding agent, and where the agent was wrong",
         "core": True,
