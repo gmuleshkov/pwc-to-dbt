@@ -13,6 +13,8 @@ from pwc_to_dbt.convert import convert
 ROOT = Path(__file__).resolve().parents[1]
 SAMPLE = ROOT / "examples" / "FLOWLINE_DEMO_JAFFLESHOP.xml"
 GOLDEN = ROOT / "examples" / "jaffle_dbt"
+REPAIRED = ROOT / "examples" / "FLOWLINE_DEMO_JAFFLESHOP_REPAIRED.xml"
+REPAIRED_GOLDEN = ROOT / "examples" / "jaffle_dbt_repaired"
 
 
 @pytest.fixture(scope="module")
@@ -84,3 +86,33 @@ def test_generated_sql_has_no_jinja_we_do_not_expect():
     for path in GOLDEN.rglob("*.sql"):
         for tag in re.findall(r"\{\{(.*?)\}\}", path.read_text()):
             assert re.match(r"\s*(source|ref|var)\(", tag), f"{path}: {tag}"
+
+
+# -- the repaired export (defects P1-P5 fixed, docs/DEFECTS.md)
+
+
+def test_committed_repaired_export_is_what_repair_mapping_produces(tmp_path):
+    import sys
+
+    sys.path.insert(0, str(ROOT / "verify"))
+    import repair_mapping
+
+    out = tmp_path / "repaired.xml"
+    changes = repair_mapping.repair(str(SAMPLE), str(out))
+    assert out.read_bytes() == REPAIRED.read_bytes(), "run `make repair`"
+    assert (ROOT / "examples" / "REPAIR_CHANGES.txt").read_text() == "\n".join(changes) + "\n"
+
+
+def test_repaired_export_has_no_defect_warnings():
+    messages = [i.message for i in convert(model.load(REPAIRED)[0]).issues]
+    assert not [m for m in messages if "crossed link" in m or "compares a value with itself" in m]
+
+
+def test_repaired_output_matches_golden_files(tmp_path):
+    out = tmp_path / "jaffle_dbt_repaired"
+    assert cli.main(["convert", str(REPAIRED), "-o", str(out)]) == 0
+    produced = {p.relative_to(out): p.read_text() for p in out.rglob("*") if p.is_file()}
+    golden = {p.relative_to(REPAIRED_GOLDEN): p.read_text() for p in REPAIRED_GOLDEN.rglob("*") if p.is_file()}
+    assert sorted(produced) == sorted(golden)
+    for path, text in produced.items():
+        assert text == golden[path], f"{path} differs from the golden file (run `make repair` if intended)"

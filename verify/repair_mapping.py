@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import sys
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 PATCHES: list[tuple[str, str]] = []  # (id, description) for the README / report
 
@@ -128,6 +129,8 @@ def perishable(folder):
 
 
 def repair(src: str, dst: str) -> list[str]:
+    raw = Path(src).read_bytes()
+    header = raw[: raw.index(b"<POWERMART")]  # XML declaration + DOCTYPE, kept so the file still looks like an export
     tree = ET.parse(src)
     folder = tree.getroot().find(".//FOLDER")
     changes = []
@@ -136,7 +139,8 @@ def repair(src: str, dst: str) -> list[str]:
         if not done:
             raise SystemExit(f"patch {fn.pid} changed nothing; is this the sample export?")
         changes += [f"[{fn.pid}] {c}" for c in done]
-    tree.write(dst, encoding="utf-8", xml_declaration=True)
+    body = ET.tostring(tree.getroot(), encoding="unicode").encode("cp1252", errors="xmlcharrefreplace")
+    Path(dst).write_bytes(header + body + b"\n")
     return changes
 
 

@@ -1,0 +1,71 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: "Tables read by PowerCenter source definitions owned by RAW"
+    tables:
+      - name: raw_customers
+        columns:
+          - name: id
+            data_type: varchar
+          - name: name
+            data_type: varchar
+      - name: raw_items
+        columns:
+          - name: id
+            data_type: varchar
+          - name: order_id
+            data_type: varchar
+          - name: sku
+            data_type: varchar
+      - name: raw_orders
+        columns:
+          - name: id
+            data_type: varchar
+          - name: customer
+            data_type: varchar
+          - name: ordered_at
+            data_type: timestamp
+          - name: store_id
+            data_type: varchar
+          - name: subtotal
+            data_type: decimal(15, 0)
+          - name: tax_paid
+            data_type: decimal(15, 0)
+          - name: order_total
+            data_type: decimal(12, 2)
+      - name: raw_products
+        columns:
+          - name: sku
+            data_type: varchar
+          - name: name
+            data_type: varchar
+          - name: type
+            data_type: varchar
+          - name: price
+            data_type: decimal(15, 0)
+          - name: description
+            data_type: varchar
+      - name: raw_stores
+        columns:
+          - name: id
+            data_type: varchar
+          - name: name
+            data_type: varchar
+          - name: opened_at
+            data_type: timestamp
+          - name: tax_rate
+            data_type: decimal(6, 4)
+      - name: raw_supplies
+        columns:
+          - name: id
+            data_type: varchar
+          - name: name
+            data_type: varchar
+          - name: cost
+            data_type: decimal(15, 0)
+          - name: perishable
+            data_type: varchar
+          - name: sku
+            data_type: varchar

@@ -18,8 +18,9 @@ Needs [uv](https://docs.astral.sh/uv/) (it installs Python 3.12 and dbt-duckdb i
 make install                    # uv sync
 make inspect                    # what each mapping does: the flow of transformations per target
 make convert                    # sample -> examples/jaffle_dbt (dbt project + conversion_report.md)
-make test                       # 52 unit/semantic/golden tests, offline, < 1 s
+make test                       # 55 unit/semantic/golden tests, offline, < 1 s
 make e2e                        # full check against jaffle-shop (~30 s; first run clones it), writes verify/REPORT.md
+make repair                     # sample with defects P1-P5 fixed -> examples/*_REPAIRED.xml + examples/jaffle_dbt_repaired
 ```
 
 Converting your own export:
@@ -128,6 +129,10 @@ previous-row reads): flipping either makes the tests fail.
 Found by the converter's warnings and confirmed by the repaired run. They are converted faithfully, because a
 migration tool that silently "fixes" logic would hide changes from the people signing off the migration.
 
+The full write-up (plain-words explanation, cause, fix and how each was confirmed) is in
+[`docs/DEFECTS.md`](docs/DEFECTS.md). A copy of the export with all five fixed, and its converted dbt project, are in
+`examples/FLOWLINE_DEMO_JAFFLESHOP_REPAIRED.xml` and `examples/jaffle_dbt_repaired/` (`make repair`).
+
 | | Defect | Effect when run as-is |
 |---|---|---|
 | P1 | Crossed links into targets: `SUBTOTAL -> SUBTOTAL_CENTS` while `SUBTOTAL_CENTS -> SUBTOTAL` (also `TAX_PAID`, `ORDER_TOTAL`, `PRODUCT_PRICE`; `CUSTOMER_360`'s three lifetime-money columns are rotated; `PRODUCT_DAILY_PERFORMANCE` swaps `MARGIN_PCT` and `PERISHABLE_SALES_FLAG`) | staging money columns are off by 100x, and that flows into every mart |
@@ -229,6 +234,6 @@ export is in `docs/agent-conversation.md`.
 src/pwc_to_dbt/   model.py (XML -> IR), expr.py (expressions), convert.py (graph -> models), render.py, cli.py
 tests/            synthetic mappings executed in DuckDB, expression tests, sample + golden tests, e2e
 verify/           e2e.py, compare.py + reference_map.toml, repair_mapping.py, invariants.py, REPORT.md
-examples/         the sample export and its converted dbt project (golden output)
-docs/             prompts and the agent conversation
+examples/         the sample export, its converted dbt project (golden output), and the repaired export + project
+docs/             DEFECTS.md, prompts and the agent conversation
 ```
