@@ -1,4 +1,4 @@
-"""The demo script: ten slides as data. The page (demo/static/app.js) renders them.
+"""The demo script: eleven slides as data. The page (demo/static/app.js) renders them.
 
 Per slide:
   points   what the slide shows and says
@@ -36,6 +36,43 @@ QUERY_P5 = """select (select sum(is_perishable_supply::int) from reference.stg_s
        (select sum(is_perishable::int) from repaired.stg_supplies) as repaired_perishable"""
 
 SLIDES = [
+    # ------------------------------------------------------------------------------------------------ 0
+    {
+        "id": "data",
+        "short": "Data",
+        "title": "The data we work with",
+        "subtitle": "A fictional shop chain: raw tables, then staging, then marts",
+        "core": True,
+        "minutes": 2,
+        "points": [
+            "**Jaffle shop** is dbt's own demo dataset: a chain of stores selling food and drinks. Customers place "
+            "**orders** at **stores**. Each order has **items**, each item is a **product**, and products are made "
+            "from **supplies**.",
+            "Six **raw** tables hold that data: customers, stores, orders, items, products and supplies. IDs are text, "
+            "money is in cents, and dates are timestamps.",
+            "The PowerCenter workflow turns them into **staging** tables (clean names, dollars), then **core marts** "
+            "(joins and totals), then **enriched marts** (customer segments, daily store and product figures).",
+            "Each layer is one PowerCenter mapping, so the converter's work lines up with these layers. Click a table "
+            "to see its columns, and for raw tables a few real rows.",
+        ],
+        "mention": [
+            "It is public sample data. Nothing here is real customer data.",
+            "In the XML the raw tables are declared as **Oracle**. Here they are loaded into DuckDB. The converter "
+            "never connects to a database; it only translates the logic.",
+            "Staging and core marts mirror jaffle-shop's own models, so they have a known right answer. The five "
+            "enriched marts exist only in the XML and are checked with invariants.",
+            "The same raw rows go through both the original dbt project and our converted one. That shared input is "
+            "what makes the comparison later meaningful.",
+        ],
+        "blocks": [
+            {"type": "lineage"},
+            {"type": "files", "title": "Read more", "items": [
+                {"label": "Source table definitions in the XML", "path": XML, "lines": [6, 40]},
+                {"label": "README: what the sample mapping does", "path": "README.md",
+                 "section": "What the sample mapping does"},
+            ]},
+        ],
+    },
     # ------------------------------------------------------------------------------------------------ 1
     {
         "id": "problem",

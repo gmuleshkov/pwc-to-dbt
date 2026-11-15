@@ -161,3 +161,12 @@ input.wide { width: 100%; font-family: var(--mono); font-size: 14px; }
 #drawer header .path { font: 600 13px var(--mono); flex: 1; word-break: break-all; }
 #drawer .body { padding: 10px 14px 20px; overflow: auto; flex: 1; }
 #drawer .code { max-height: none; }
+
+/* table lineage */
+.legend { font-size: 12px; }
+.legend.k-source { background: var(--k-source); } .legend.k-sq { background: var(--k-sq); } .legend.k-expr { background: var(--k-expr); }
+.legend.k-aggr { background: var(--k-aggr); } .legend.k-union { background: var(--k-union); } .legend.k-target { background: var(--k-target); }
+.legend { color: var(--ink); }
+.tabledetail { margin-top: 12px; }
+.tabledetail h3 { margin: 10px 0 6px; }
+.graphbox.tall { max-height: 700px; }

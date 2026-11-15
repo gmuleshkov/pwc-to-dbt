@@ -167,7 +167,7 @@ def walk(node):
 
 
 def test_slides_are_well_formed():
-    assert len(slides.SLIDES) == 10 and len({s["id"] for s in slides.SLIDES}) == 10
+    assert len(slides.SLIDES) == 11 and len({s["id"] for s in slides.SLIDES}) == 11
     for s in slides.SLIDES:
         assert s["points"] and s["mention"] and s["blocks"], s["id"]
         assert s["short"] and len(s["short"]) <= 12, s["id"]
@@ -227,3 +227,28 @@ def test_local_notes_file_is_ignored_by_git():
 
     out = subprocess.run(["git", "check-ignore", "demo/local_notes.py"], cwd=ROOT, capture_output=True, text=True)
     assert out.returncode == 0, "demo/local_notes.py must stay out of the repository"
+
+
+# -- the data slide
+
+def test_lineage_covers_every_table_and_follows_the_ref_and_source_calls():
+    data = server.lineage()
+    layers = {t["name"]: t["layer"] for t in data["tables"]}
+    assert len(layers) == 22 and sum(v == "raw" for v in layers.values()) == 6
+    assert layers["stg_orders"] == "staging" and layers["orders"] == "marts core"
+    assert layers["customer_360"] == "marts enriched"
+    assert all(t["columns"] for t in data["tables"])
+    # the arrows follow source()/ref() and look through intermediate models
+    import re
+
+    edges = set(re.findall(r'data-node="([\w]+)"', data["svg"]))
+    assert edges >= set(layers) and data["svg"].count('class="edge"') >= 25
+    assert [item["label"] for item in data["legend"]] == ["raw", "staging", "marts core", "marts enriched"]
+
+
+@needs_db
+def test_raw_sample_returns_rows_and_refuses_anything_but_raw_tables(base):
+    status, r = call(base, "GET", "/api/sample?table=raw_orders")
+    assert status == 200 and r["count"] > 1000 and len(r["rows"]) == 5 and "ordered_at" in r["columns"]
+    for bad in ("stg_orders", "raw_orders; drop table raw.raw_orders", "../etc/passwd", ""):
+        assert call(base, "GET", "/api/sample?table=" + quote(bad))[0] == 404

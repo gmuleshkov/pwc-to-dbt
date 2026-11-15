@@ -18,7 +18,7 @@ Needs [uv](https://docs.astral.sh/uv/) (it installs Python 3.12 and dbt-duckdb i
 make install                    # uv sync
 make inspect                    # what each mapping does: the flow of transformations per target
 make convert                    # sample -> examples/jaffle_dbt (dbt project + conversion_report.md)
-make test                       # 83 unit/semantic/golden/demo tests, offline, ~1 s
+make test                       # 88 unit/semantic/golden/demo tests, offline, ~1 s
 make e2e                        # full check against jaffle-shop (~30 s; first run clones it), writes verify/REPORT.md
 make repair                     # sample with defects P1-P5 fixed -> examples/*_REPAIRED.xml + examples/jaffle_dbt_repaired
 make demo                       # interactive walk-through on http://127.0.0.1:8765 (see demo/README.md)

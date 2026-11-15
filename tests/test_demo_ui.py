@@ -27,6 +27,8 @@ sys.path.insert(0, str(ROOT / "demo"))
 import slides  # noqa: E402
 
 SLIDE_COUNT = len(slides.SLIDES)
+# slide number by id, so reordering slides keeps the tests valid
+NO = {s["id"]: i + 1 for i, s in enumerate(slides.SLIDES)}
 SLOW = 240_000  # ms, for the end-to-end run
 
 
@@ -103,16 +105,21 @@ def run_action(page, key, button_text, done=r"OK|FAILED|caught", timeout=30_000)
     return card, badge.inner_text(), card.locator(".term").inner_text()
 
 
-def db_unlocked():
+def db_unlocked(wait=8.0):
+    """True if nothing holds the database. Retries briefly: the demo server reads it for a moment when slide 1 loads."""
     if not DB.exists():
         return False
     import duckdb
 
-    try:
-        duckdb.connect(str(DB)).close()
-        return True
-    except duckdb.IOException:
-        return False
+    deadline = time.time() + wait
+    while True:
+        try:
+            duckdb.connect(str(DB)).close()
+            return True
+        except duckdb.IOException:
+            if time.time() > deadline:
+                return False
+            time.sleep(0.2)
 
 
 needs_db = pytest.mark.skipif(not DB.exists(), reason="run `make e2e` once to build verify/work/jaffle.duckdb")
@@ -141,9 +148,11 @@ def test_navigation_by_keys_buttons_hash_and_nav_bar(page):
     page.keyboard.press("7")
     expect(page.locator("#slide h1")).to_have_text(re.compile(r"^7\. "))
     page.keyboard.press("0")
+    expect(page.locator("#slide h1")).to_have_text(re.compile(r"^10\. "))
+    page.keyboard.press("ArrowRight")
     expect(page.locator("#slide h1")).to_have_text(re.compile(rf"^{SLIDE_COUNT}\. "))
     page.get_by_role("button", name="Previous slide").click()
-    expect(page.locator("#slide h1")).to_have_text(re.compile(rf"^{SLIDE_COUNT - 1}\. "))
+    expect(page.locator("#slide h1")).to_have_text(re.compile(r"^10\. "))
     page.goto(page.base + "/#/6")
     page.reload()
     expect(page.locator("#slide h1")).to_have_text(re.compile(r"^6\. "))
@@ -151,12 +160,12 @@ def test_navigation_by_keys_buttons_hash_and_nav_bar(page):
 
 
 def test_typing_in_a_field_does_not_change_slides(page):
-    go(page, 3)
+    go(page, NO["how"])
     box = page.get_by_label("Informatica formula")
     box.click()
     box.press("End")
     box.type("12", delay=20)
-    expect(page.locator("#slide h1")).to_have_text(re.compile(r"^3\. "))
+    expect(page.locator("#slide h1")).to_have_text(re.compile(rf"^{NO['how']}\. "))
 
 
 def test_timer_runs_and_resets(page):
@@ -190,7 +199,7 @@ def test_every_file_link_and_flow_box_opens_the_viewer(page):
 
 
 def test_viewer_highlights_the_requested_lines_and_shows_the_whole_file_on_demand(page):
-    go(page, 2)
+    go(page, NO["input"])
     page.get_by_role("button", name="Open in the file viewer").first.click()
     expect(page.locator("#drawer .path")).to_contain_text("lines 106-124")
     assert page.locator("#drawer .ln.hl").count() == 19
@@ -202,7 +211,7 @@ def test_viewer_highlights_the_requested_lines_and_shows_the_whole_file_on_deman
 
 
 def test_markdown_section_links_highlight_the_section(page):
-    go(page, 9)
+    go(page, NO["limits"])
     page.get_by_role("button", name="README: assumptions and what is not handled").click()
     expect(page.locator("#drawer .path")).to_contain_text("README.md")
     assert page.locator("#drawer .ln.hl").count() > 10
@@ -211,7 +220,7 @@ def test_markdown_section_links_highlight_the_section(page):
 # -- graphs
 
 def test_every_target_graph_draws_and_every_box_responds(page):
-    go(page, 4)
+    go(page, NO["output"])
     maps = page.get_by_label("Mapping", exact=True)
     expect(maps.locator("option")).to_have_count(3)
     mapping_names = maps.locator("option").all_inner_texts()
@@ -244,7 +253,7 @@ def test_every_target_graph_draws_and_every_box_responds(page):
 
 
 def test_clicking_a_selected_box_again_clears_the_highlight(page):
-    go(page, 4)
+    go(page, NO["output"])
     node = page.locator('svg.graph .node[data-node="EXP_ORDERS"]')
     node.click()
     assert page.locator(".code .ln.hl").count() == 15
@@ -253,7 +262,7 @@ def test_clicking_a_selected_box_again_clears_the_highlight(page):
 
 
 def test_a_shared_node_points_to_its_intermediate_model(page):
-    go(page, 4)
+    go(page, NO["output"])
     page.get_by_label("Mapping", exact=True).select_option("m_FL_JS_MARTS_ENRICHED")
     page.get_by_label("Target", exact=True).select_option("CUSTOMER_360")
     expect(page.locator("svg.graph .node").first).to_be_visible()
@@ -268,7 +277,7 @@ def test_a_shared_node_points_to_its_intermediate_model(page):
 # -- formula translator
 
 def test_translator_examples_and_editing(page):
-    go(page, 3)
+    go(page, NO["how"])
     examples = page.locator('.card:has(input[aria-label="Informatica formula"]) button.ex')
     results = {}
     for i in range(examples.count()):
@@ -299,7 +308,7 @@ def test_translator_examples_and_editing(page):
 
 @needs_db
 def test_defect_queries_show_the_numbers_in_the_story(page):
-    go(page, 7)
+    go(page, NO["defects"])
     expected = {0: "converted_subtotal", 1: "repaired_tax", 2: "converted_n", 3: "61948", 4: "converted_perishable"}
     for i, text in expected.items():
         d = page.locator(".defect").nth(i)
@@ -314,7 +323,7 @@ def test_defect_queries_show_the_numbers_in_the_story(page):
 
 @needs_db
 def test_sql_console_canned_queries_free_typing_and_refusals(page):
-    go(page, 7)
+    go(page, NO["defects"])
     card = page.locator('.card:has(textarea[aria-label="SQL"])')
     chips = card.locator("button.ex")
     for i in range(chips.count()):
@@ -337,7 +346,7 @@ def test_sql_console_canned_queries_free_typing_and_refusals(page):
 
 @needs_db
 def test_query_with_many_rows_is_truncated(page):
-    go(page, 7)
+    go(page, NO["defects"])
     card = page.locator('.card:has(textarea[aria-label="SQL"])')
     card.get_by_label("SQL").fill("select * from raw.raw_orders")
     card.get_by_role("button", name="Run query").click()
@@ -348,7 +357,7 @@ def test_query_with_many_rows_is_truncated(page):
 # -- live actions
 
 def test_unit_tests_button(page):
-    go(page, 8)
+    go(page, NO["tests"])
     card, badge, out = run_action(page, "tests", "Run: all unit tests")
     assert "OK:" in badge and "passed" in badge and "FAILED" not in badge
     assert "tests/test_expr.py" in out and "$ pytest -v" in out
@@ -356,7 +365,7 @@ def test_unit_tests_button(page):
 
 def test_break_the_joiner_rule_is_caught_and_the_source_is_untouched(page):
     before = (ROOT / "src/pwc_to_dbt/convert.py").read_bytes()
-    go(page, 8)
+    go(page, NO["tests"])
     card, badge, out = run_action(page, "break-joiner", "Run: break the Joiner rule")
     assert "caught the broken rule" in badge and "FAILED" not in badge
     assert "temporary COPY" in out and "importing from /tmp/" in out
@@ -365,23 +374,23 @@ def test_break_the_joiner_rule_is_caught_and_the_source_is_untouched(page):
 
 
 def test_convert_and_diff_button(page):
-    go(page, 4)
+    go(page, NO["output"])
     card, badge, out = run_action(page, "convert", "Run: convert the sample")
     assert "identical to the golden project" in badge
     assert "Generated 25 files" in out
 
 
 def test_inspect_button(page):
-    go(page, 2)
+    go(page, NO["input"])
     card, badge, out = run_action(page, "inspect", "Run: inspect")
     assert "OK" in badge and "STG_ORDERS:" in out and "JNR_SUPPLIES_PRODUCTS" in out
 
 
 def test_output_survives_leaving_and_returning_to_a_slide(page):
-    go(page, 2)
+    go(page, NO["input"])
     run_action(page, "inspect", "Run: inspect")
-    go(page, 3)
-    go(page, 2)
+    go(page, NO["how"])
+    go(page, NO["input"])
     card = page.locator('[data-action^="inspect"]')
     assert "STG_ORDERS:" in card.locator(".term").inner_text() and "OK" in card.locator(".badge").inner_text()
 
@@ -390,13 +399,13 @@ def test_output_survives_leaving_and_returning_to_a_slide(page):
 def test_end_to_end_from_the_ui_then_tables_refresh_and_buttons_lock_while_running(page):
     if not db_unlocked():
         pytest.skip("verify/work/jaffle.duckdb is locked by another process (close any duckdb shell)")
-    go(page, 6)
+    go(page, NO["proof"])
     card = page.locator('[data-action^="e2e"]')
     card.get_by_role("button", name="Run: full end-to-end check").click()
     expect(card.locator(".badge")).to_have_text("running ...")
-    go(page, 8)  # another action cannot start while this one runs
+    go(page, NO["tests"])  # another action cannot start while this one runs
     expect(page.get_by_role("button", name="Run: all unit tests")).to_be_disabled()
-    go(page, 6)
+    go(page, NO["proof"])
     expect(card.locator(".badge")).to_have_text(re.compile(r"OK|FAILED"), timeout=SLOW)
     assert "E2E OK" in card.locator(".badge").inner_text(), card.locator(".term").inner_text()[-800:]
     term = card.locator(".term").inner_text()
@@ -404,8 +413,8 @@ def test_end_to_end_from_the_ui_then_tables_refresh_and_buttons_lock_while_runni
     tables = page.locator(".card table.t")
     expect(tables.first.locator("tbody tr").first).to_be_visible()
     page.wait_for_function("document.querySelectorAll('.card table.t tbody tr').length > 20", timeout=30_000)
-    assert page.get_by_text("Every difference is listed with its cause").count() >= 2
-    go(page, 8)
+    expect(page.get_by_text("Every difference is listed with its cause")).to_have_count(2, timeout=30_000)
+    go(page, NO["tests"])
     expect(page.get_by_role("button", name="Run: all unit tests")).to_be_enabled()
 
 
@@ -417,7 +426,7 @@ def test_locked_database_gives_a_clear_message_and_sql_console_still_reads(page)
         pytest.skip("database already locked by another process")
     holder = duckdb.connect(str(DB))  # a writer, like a forgotten duckdb shell
     try:
-        go(page, 6)
+        go(page, NO["proof"])
         card = page.locator('[data-action^="e2e"]')
         card.get_by_role("button", name="Run: full end-to-end check").click()
         expect(card.locator(".badge")).to_contain_text("locked", timeout=20_000)
@@ -430,7 +439,7 @@ def test_locked_database_gives_a_clear_message_and_sql_console_still_reads(page)
 def test_status_endpoint_reports_busy_while_an_action_runs(page, url):
     import json
 
-    go(page, 8)
+    go(page, NO["tests"])
     page.get_by_role("button", name="Run: all unit tests").click()
     status = json.loads(urllib.request.urlopen(url + "/api/status").read())
     assert status["busy"] in (None, "tests")
@@ -444,7 +453,7 @@ def test_status_endpoint_reports_busy_while_an_action_runs(page, url):
 def test_light_and_dark_themes(browser, url, scheme, tmp_path):
     ctx = browser.new_context(viewport={"width": 1600, "height": 1000}, color_scheme=scheme)
     pg = ctx.new_page()
-    pg.goto(url + "/#/4")
+    pg.goto(url + f"/#/{NO['output']}")
     expect(pg.locator("svg.graph .node").first).to_be_visible()
     bg = pg.evaluate("getComputedStyle(document.body).backgroundColor")
     light = bg == "rgb(245, 247, 250)"
@@ -494,3 +503,35 @@ def test_all_slide_buttons_fit_in_the_top_bar_on_a_laptop_screen(browser, url):
     sizes = pg.evaluate("[document.querySelector('#steps').scrollWidth, document.querySelector('#steps').clientWidth]")
     ctx.close()
     assert sizes[0] <= sizes[1], f"slide buttons are clipped: {sizes}"
+
+
+# -- the data slide
+
+@needs_db
+def test_data_slide_shows_the_table_lineage_columns_and_sample_rows(page):
+    go(page, NO["data"])
+    expect(page.locator("svg.graph .node").first).to_be_visible()
+    assert page.locator("svg.graph .node").count() == 22
+    assert page.locator("svg.graph .edge").count() >= 25
+    assert page.locator(".legend").all_inner_texts() == ["raw", "staging", "marts core", "marts enriched"]
+    # a raw table is pre-selected and shows real rows
+    detail = page.locator(".tabledetail")
+    expect(detail).to_contain_text("raw_customers")
+    expect(detail.locator("table").nth(1)).to_be_visible()
+    assert detail.locator("table").nth(1).locator("tbody tr").count() == 5
+    # another raw table: columns plus row count
+    page.locator('svg.graph .node[data-node="raw_orders"]').click()
+    expect(detail).to_contain_text("61,948 rows")
+    assert "ordered_at" in detail.inner_text()
+    # a model has columns but no sample rows
+    page.locator('svg.graph .node[data-node="stg_orders"]').click()
+    expect(detail).to_contain_text("stg_orders")
+    assert detail.locator("table").count() == 1 and "subtotal_cents" in detail.inner_text()
+    assert page.locator("svg.graph .node.sel").count() == 1
+
+
+def test_data_slide_works_even_without_the_database(page):
+    go(page, NO["data"])
+    expect(page.locator("svg.graph .node").first).to_be_visible()
+    page.locator('svg.graph .node[data-node="stg_orders"]').click()
+    assert "subtotal_cents" in page.locator(".tabledetail").inner_text()

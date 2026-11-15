@@ -146,6 +146,21 @@ def graph_index() -> list[dict]:
     return out
 
 
+@lru_cache(maxsize=1)
+def lineage() -> dict:
+    return graph.table_lineage(project())
+
+
+def raw_sample(table: str) -> dict:
+    """Row count and a few rows of one raw table (the input data), from the demo database."""
+    names = {t["name"] for t in lineage()["tables"] if t["layer"] == "raw"}
+    if table not in names:
+        raise KeyError(f"unknown raw table {table}")
+    count = run_sql(f"select count(*) as n from raw.{table}")["rows"][0][0]  # name checked against the list above
+    sample = run_sql(f"select * from raw.{table} limit 5")
+    return {"table": table, "count": count, "columns": sample["columns"], "rows": sample["rows"]}
+
+
 def graph_for(mapping: str, target: str) -> dict:
     entry = next((t for m in graph_index() if m["mapping"] == mapping for t in m["targets"]
                   if t["instance"] == target), None)
@@ -529,6 +544,10 @@ class Handler(BaseHTTPRequestHandler):
                                        "repo": REPO_URL})
             if url.path == "/api/file":
                 return self.send_json(read_file(q.get("path", ""), q.get("section", "")))
+            if url.path == "/api/lineage":
+                return self.send_json(lineage())
+            if url.path == "/api/sample":
+                return self.send_json(raw_sample(q.get("table", "")))
             if url.path == "/api/graph-index":
                 return self.send_json(graph_index())
             if url.path == "/api/graph":
