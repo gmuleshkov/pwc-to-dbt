@@ -10,3 +10,4 @@ out/
 *.duckdb.wal
 .user.yml
 .idea/
+demo/local_notes.py

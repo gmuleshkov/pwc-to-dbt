@@ -73,11 +73,3 @@ One difference remains by design, and it is not a defect: for orders without ite
   lint for them would guess and be noisy, so we did not add one.
 - The repaired XML is for our converter and for reference. It was not re-imported into PowerCenter, which we do not
   have.
-
-## Questions to expect
-
-- *Why not fix these inside the converter?* Because a converter must not change behaviour silently. It reports and
-  the mapping owner decides. A reviewed, opt-in repair (as here) is the safe form.
-- *How do you know it is the mapping and not your converter?* The repaired export matches the reference on every
-  shared column, and the converter's unit tests pin the semantics (join direction, previous-row reads) independently.
-- *Were these planted?* We cannot tell. The demo repo only says "for demo purposes only".

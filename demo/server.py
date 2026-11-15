@@ -10,6 +10,7 @@ run one read-only SQL statement on the demo database. It listens on 127.0.0.1 on
 from __future__ import annotations
 
 import argparse
+import copy
 import dataclasses
 import json
 import mimetypes
@@ -113,6 +114,24 @@ def folder():
 @lru_cache(maxsize=1)
 def project():
     return convert(folder())
+
+
+def load_slides() -> list[dict]:
+    """The public slides, plus private presenter notes from demo/local_notes.py when that file exists (not in git)."""
+    try:
+        import local_notes
+    except ModuleNotFoundError as e:
+        if e.name != "local_notes":
+            raise
+        return slides.SLIDES
+    merged = copy.deepcopy(slides.SLIDES)
+    for s in merged:
+        s["blocks"] += copy.deepcopy(getattr(local_notes, "BLOCKS", {}).get(s["id"], []))
+        s["mention"] += list(getattr(local_notes, "MENTION", {}).get(s["id"], []))
+    return merged
+
+
+SLIDES = load_slides()
 
 
 def graph_index() -> list[dict]:
@@ -503,7 +522,7 @@ class Handler(BaseHTTPRequestHandler):
             if url.path.startswith("/static/"):
                 return self.static(url.path[len("/static/"):])
             if url.path == "/api/slides":
-                return self.send_json(slides.SLIDES)
+                return self.send_json(SLIDES)
             if url.path == "/api/status":
                 job = STATE["job"]
                 return self.send_json({"busy": job.name if job and not job.done else None, "db": DB.exists(),

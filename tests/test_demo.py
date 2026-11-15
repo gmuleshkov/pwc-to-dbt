@@ -197,3 +197,33 @@ def test_every_canned_query_in_the_slides_runs():
     assert len(queries) >= 10
     for sql in queries:
         assert server.run_sql(sql)["columns"], sql
+
+
+# -- private presenter notes (demo/local_notes.py is not in git)
+
+def test_public_slides_work_without_local_notes(monkeypatch):
+    monkeypatch.setitem(sys.modules, "local_notes", None)  # as if the file does not exist
+    merged = server.load_slides()
+    assert merged == slides.SLIDES
+    assert not [b for s in merged for b in s["blocks"] if b["type"] == "qa"]
+
+
+def test_local_notes_are_merged_into_the_slides_without_touching_the_public_ones(monkeypatch):
+    import types
+
+    notes = types.ModuleType("local_notes")
+    notes.BLOCKS = {"decisions": [{"type": "qa", "title": "Notes", "items": [{"q": "q?", "a": "a"}]}]}
+    notes.MENTION = {"defects": ["extra line"]}
+    monkeypatch.setitem(sys.modules, "local_notes", notes)
+    merged = {s["id"]: s for s in server.load_slides()}
+    assert merged["decisions"]["blocks"][-1]["title"] == "Notes"
+    assert merged["defects"]["mention"][-1] == "extra line"
+    original = {s["id"]: s for s in slides.SLIDES}
+    assert original["decisions"]["blocks"][-1]["type"] != "qa" and "extra line" not in original["defects"]["mention"]
+
+
+def test_local_notes_file_is_ignored_by_git():
+    import subprocess
+
+    out = subprocess.run(["git", "check-ignore", "demo/local_notes.py"], cwd=ROOT, capture_output=True, text=True)
+    assert out.returncode == 0, "demo/local_notes.py must stay out of the repository"

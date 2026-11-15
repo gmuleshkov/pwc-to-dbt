@@ -57,6 +57,21 @@ Tested with Chrome. Any current browser should work, and the page follows the sy
 | The browser does not open | Open the printed address yourself. |
 | Slide text changed but the page still shows the old text | Slide text is loaded when the server starts. Restart it. Code and styles reload on refresh. |
 
+## Private presenter notes (optional, not in git)
+
+If `demo/local_notes.py` exists, the server adds its content to the slides. The file is listed in `.gitignore`, so it
+stays on your machine. Use it for anything you want on screen while presenting but not in the repository, for example
+rehearsed answers:
+
+```python
+BLOCKS = {  # slide id -> extra blocks, in the same format as demo/slides.py
+    "decisions": [{"type": "qa", "title": "Notes", "items": [{"q": "A question?", "a": "The answer."}]}],
+}
+MENTION = {"defects": ["An extra line for the Mention panel"]}  # slide id -> extra lines
+```
+
+Slide ids are in `demo/slides.py`. Restart the server after editing the file. Without it the demo is complete.
+
 ## Testing the demo
 
 ```bash

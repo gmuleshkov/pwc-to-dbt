@@ -222,7 +222,10 @@ def test_every_target_graph_draws_and_every_box_responds(page):
         tgt = page.get_by_label("Target", exact=True)
         n_targets = tgt.locator("option").count()
         for i in range(n_targets):
+            value = tgt.locator("option").nth(i).get_attribute("value")
             tgt.select_option(index=i)
+            # wait for this target's graph (the previous one stays on screen until the fetch returns)
+            expect(page.locator("svg.graph")).to_have_attribute("aria-label", f"Mapping graph for {value}")
             expect(page.locator("svg.graph .node").first).to_be_visible()
             nodes = page.locator("svg.graph .node")
             count = nodes.count()

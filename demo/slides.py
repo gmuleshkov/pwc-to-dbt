@@ -415,19 +415,6 @@ SLIDES = [
                 ["Update Strategy, Sequence Generator, Normalizer, Rank", "not yet", "compile-error model"],
                 ["Mapplets, shortcuts", "not handled", "reported; must be expanded first"],
             ]},
-            {"type": "qa", "title": "If asked", "items": [
-                {"q": "How would you add Lookup?",
-                 "a": "A new handler: a connected Lookup is a left join to the lookup table. The hard part is the policy "
-                      "for multiple matches (first, last or error), which must come from the Lookup's settings. An "
-                      "unconnected `:LKP` call would become a scalar subquery. Each needs execution tests."},
-                {"q": "What about 500 mappings?",
-                 "a": "Run with `--strict` in CI, read the report to see which unsupported types occur most, implement "
-                      "those first, and keep golden files per export. Parity testing against legacy output decides "
-                      "when each mapping is done."},
-                {"q": "Does it work on Snowflake or BigQuery?",
-                 "a": "Not yet. Function names (`strftime`, `strptime`, `date_diff`) are DuckDB's. A dialect layer "
-                      "in the emitter is the next step."},
-            ]},
             {"type": "files", "title": "Read more", "items": [
                 {"label": "README: assumptions and what is not handled", "path": "README.md", "section": "Assumptions and what is not handled"},
                 {"label": "README: where the output is most likely wrong", "path": "README.md", "section": "Where the output is most likely wrong"},
@@ -472,22 +459,6 @@ SLIDES = [
                  "text": "An independent oracle, with every difference explained, plus a repaired run to prove the diagnosis."},
                 {"title": "Tables, DuckDB dialect",
                  "text": "Sessions truncate and reload, so full-refresh tables. DuckDB keeps the demo local; a dialect layer comes later."},
-            ]},
-            {"type": "qa", "title": "Likely questions", "items": [
-                {"q": "Why not just ask an LLM to convert it?",
-                 "a": "Same input must give the same output, and every rule needs a test. An LLM is good for leftovers the "
-                      "converter reports as unsupported, with a human review, not as the engine."},
-                {"q": "Why reproduce the bugs?",
-                 "a": "A migration tool that changes behavior silently hides it from the owners. We warn, prove, and offer "
-                      "a repaired copy as a separate, reviewable step."},
-                {"q": "How do you know it is correct without PowerCenter?",
-                 "a": "Two independent checks: tests that encode Informatica's documented rules, and a row-by-row comparison "
-                      "with the real jaffle shop. The limit: a real migration would diff against actual PowerCenter output."},
-                {"q": "What would you do first on a real customer export?",
-                 "a": "Run it with `--strict`, read the report for unsupported types, then set up parity tests against the "
-                      "legacy tables before changing any logic."},
-                {"q": "What did the agent get wrong?",
-                 "a": "See the README section \"Working with the coding agent\": seven cases, each with how it was caught."},
             ]},
             {"type": "files", "title": "Files", "items": [
                 {"label": "README: working with the coding agent", "path": "README.md", "section": "Working with the coding agent"},
