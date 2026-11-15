@@ -123,8 +123,9 @@ Unit tests (`tests/`) build small synthetic mappings in code and *execute* the g
 - unsupported types;
 - cross-mapping `ref()`.
 
-A golden-file test pins the sample's full output. I mutation-checked the two subtlest rules (join direction and
-previous-row reads): flipping either makes the tests fail.
+A golden-file test pins the sample's full output. The agent mutation-checked the two subtlest rules (join direction and
+previous-row reads): flipping either makes the tests fail. The demo's "break the Joiner rule" button repeats the
+join-direction check on a temporary copy.
 
 ## Defects in the sample mapping
 
@@ -186,10 +187,15 @@ Not handled. Each one is either reported or makes the model fail at compile time
 ## Working with the coding agent
 
 Built with Claude Code: Sonnet 5.5 for the investigation and plan, then Opus 5.5 after a model switch.
+The agent wrote the code. I directed the work: I made the four decisions below, asked for the plan to be reviewed after
+the model switch, required end-to-end testing against jaffle-shop, and asked for the defects to be fixed and written up.
+After the build I had the agent walk me through the code and the results step by step; that session is part 2 of the
+conversation file.
+
 The prompts, verbatim from the first one, are in [`docs/PROMPTS.md`](docs/PROMPTS.md). The full conversation is in
 [`docs/agent-conversation.md`](docs/agent-conversation.md): part 1 (investigation to first push) rebuilt from the session
-transcript, part 2 (walkthrough, defect fixes, demo UI) from `/export`. Private context from my own Claude Code
-setup was removed, as the file's header explains.
+transcript, part 2 (walkthrough, defect fixes, demo UI) from `/export`. Private context that Claude Code loads into
+every session (global instructions, memory notes) was removed, as the file's header explains.
 
 **Process:**
 1. **Investigate.** The agent cloned the demo and both jaffle shops, profiled the XML with throwaway scripts,
