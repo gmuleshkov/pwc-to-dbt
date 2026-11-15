@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pwc-to-dbt demo</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header id="bar">
+    <div class="brand">pwc-to-dbt <span>demo</span></div>
+    <nav id="steps" aria-label="Slides"></nav>
+    <div class="tools">
+      <button id="timer" class="ghost" title="Elapsed time. Click to reset.">0:00</button>
+      <button id="prev" class="ghost" title="Previous (left arrow)" aria-label="Previous slide">&larr;</button>
+      <button id="next" class="ghost" title="Next (right arrow)" aria-label="Next slide">&rarr;</button>
+    </div>
+  </header>
+  <main id="slide" tabindex="-1"></main>
+  <aside id="drawer" hidden aria-label="File viewer"></aside>
+  <footer>
+    <span>Arrow keys or 1-9, 0 to move &middot; Esc closes the file viewer</span>
+    <a id="repo" href="https://github.com/gmuleshkov/pwc-to-dbt" target="_blank" rel="noopener">github.com/gmuleshkov/pwc-to-dbt</a>
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 SAMPLE := examples/FLOWLINE_DEMO_JAFFLESHOP.xml
 UV ?= uv
 
-.PHONY: install test e2e convert repair golden lint inspect clean
+.PHONY: install test e2e convert repair golden lint inspect demo clean
 
 install:  ## create .venv with the converter, dbt-duckdb and test tools
 	$(UV) sync
@@ -25,8 +25,11 @@ inspect:  ## print each mapping's flow per target
 golden:  ## accept the current converter output as the golden files
 	UPDATE_GOLDEN=1 $(UV) run pytest tests/test_sample.py -q
 
+demo:  ## interactive presentation of this project on http://127.0.0.1:8765 (demo/README.md)
+	$(UV) run python demo/server.py
+
 lint:
-	$(UV) run ruff check src tests verify/*.py
+	$(UV) run ruff check src tests demo verify/*.py
 
 clean:
 	rm -rf verify/work verify/reference out

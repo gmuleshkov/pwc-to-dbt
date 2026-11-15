@@ -18,9 +18,10 @@ Needs [uv](https://docs.astral.sh/uv/) (it installs Python 3.12 and dbt-duckdb i
 make install                    # uv sync
 make inspect                    # what each mapping does: the flow of transformations per target
 make convert                    # sample -> examples/jaffle_dbt (dbt project + conversion_report.md)
-make test                       # 55 unit/semantic/golden tests, offline, < 1 s
+make test                       # 83 unit/semantic/golden/demo tests, offline, ~1 s
 make e2e                        # full check against jaffle-shop (~30 s; first run clones it), writes verify/REPORT.md
 make repair                     # sample with defects P1-P5 fixed -> examples/*_REPAIRED.xml + examples/jaffle_dbt_repaired
+make demo                       # interactive walk-through on http://127.0.0.1:8765 (see demo/README.md)
 ```
 
 Converting your own export:
@@ -235,5 +236,6 @@ src/pwc_to_dbt/   model.py (XML -> IR), expr.py (expressions), convert.py (graph
 tests/            synthetic mappings executed in DuckDB, expression tests, sample + golden tests, e2e
 verify/           e2e.py, compare.py + reference_map.toml, repair_mapping.py, invariants.py, REPORT.md
 examples/         the sample export, its converted dbt project (golden output), and the repaired export + project
+demo/             interactive presentation of this project (make demo)
 docs/             DEFECTS.md, prompts and the agent conversation
 ```

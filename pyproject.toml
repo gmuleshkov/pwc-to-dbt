@@ -32,6 +32,9 @@ extend-exclude = ["verify/reference", "verify/work", "out"]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP"]
 
+[tool.ruff.lint.per-file-ignores]
+"demo/slides.py" = ["E501"]  # slide text is prose
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = ["e2e: builds the jaffle-shop reference and runs dbt (slow, needs network on first run)"]
