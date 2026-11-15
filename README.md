@@ -186,8 +186,10 @@ Not handled. Each one is either reported or makes the model fail at compile time
 ## Working with the coding agent
 
 Built with Claude Code: Sonnet 5.5 for the investigation and plan, then Opus 5.5 after a model switch.
-The prompts, verbatim from the first one, are in [`docs/PROMPTS.md`](docs/PROMPTS.md). The full conversation
-export is in `docs/agent-conversation.md`.
+The prompts, verbatim from the first one, are in [`docs/PROMPTS.md`](docs/PROMPTS.md). The full conversation is in
+[`docs/agent-conversation.md`](docs/agent-conversation.md): part 1 (investigation to first push) rebuilt from the session
+transcript, part 2 (walkthrough, defect fixes, demo UI) from `/export`. Private context from my own Claude Code
+setup was removed, as the file's header explains.
 
 **Process:**
 1. **Investigate.** The agent cloned the demo and both jaffle shops, profiled the XML with throwaway scripts,
